@@ -2,7 +2,7 @@ use std::convert::{TryFrom, TryInto};
 use serde_aux::field_attributes:: deserialize_number_from_string;
 use sqlx::ConnectOptions;
 use sqlx::postgres::PgConnectOptions;
-use sqlx::postgres::PgSslMode
+use sqlx::postgres::PgSslMode;
 
 #[derive(serde::Deserialize)]
 pub struct Settings {
@@ -76,7 +76,7 @@ pub fn get_configuration() -> Result<Settings, config::ConfigError> {
 
 impl DatabaseSettings {
     pub fn with_db(&self) -> PgConnectOptions {
-        self.without_db().database(&self.database_name).log_statements(log::LevelFilter::Trace)
+        self.without_db().database(&self.database_name)
     }
 
     pub fn without_db(&self) -> PgConnectOptions {
