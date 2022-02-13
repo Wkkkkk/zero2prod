@@ -1,8 +1,8 @@
-use std::convert::{TryFrom, TryInto};
-use serde_aux::field_attributes:: deserialize_number_from_string;
-use sqlx::ConnectOptions;
+use serde_aux::field_attributes::deserialize_number_from_string;
 use sqlx::postgres::PgConnectOptions;
 use sqlx::postgres::PgSslMode;
+use sqlx::ConnectOptions;
+use std::convert::{TryFrom, TryInto};
 
 #[derive(serde::Deserialize)]
 pub struct Settings {
@@ -49,7 +49,10 @@ impl TryFrom<String> for Environment {
         match value.to_lowercase().as_str() {
             "local" => Ok(Self::Local),
             "production" => Ok(Self::Production),
-            other => Err(format!("{} is not a supported environment. Use either 'local' or 'production'.", other))
+            other => Err(format!(
+                "{} is not a supported environment. Use either 'local' or 'production'.",
+                other
+            )),
         }
     }
 }
@@ -60,13 +63,15 @@ pub fn get_configuration() -> Result<Settings, config::ConfigError> {
     let configuration_directory = base_path.join("configuration");
 
     settings.merge(config::File::from(configuration_directory.join("base")).required(true))?;
-    
+
     let environment: Environment = std::env::var("APP_ENVIRONMENT")
         .unwrap_or_else(|_| "local".into())
         .try_into()
         .expect("Failed to parse APP_ENVIRONMENT.");
-    settings.merge(config::File::from(configuration_directory.join(environment.as_str())).required(true))?;
-    
+    settings.merge(
+        config::File::from(configuration_directory.join(environment.as_str())).required(true),
+    )?;
+
     // Add in settings from environment variables (with a prefix of APP and '__' as separator)
     // E.g. `APP_APPLICATION__PORT=5001 would set `Settings.application.port`
     settings.merge(config::Environment::with_prefix("app").separator("__"))?;
